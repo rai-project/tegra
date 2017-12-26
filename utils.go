@@ -5,18 +5,20 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/Unknwon/com"
 	"github.com/pkg/errors"
 )
 
 func runShellScript(sh string) (string, error) {
-	tmpFile, err := ioutil.TempFile("", "tegra-")
+	tmpDir, err := ioutil.TempDir("", "tegra-")
 	if err != nil {
-		return "", errors.Wrap(err, "cannot create temporary file")
+		return "", errors.Wrap(err, "cannot create temporary directory")
 	}
-	defer os.Remove(tmpFile)
-	if err := com.WriteFile(tmpFile, sh); err != nil {
+	defer os.RemoveAll(tmpDir)
+	tmpFile := filepath.Join(tmpDir, "script.sh")
+	if err := com.WriteFile(tmpFile, []byte(sh)); err != nil {
 		return "", errors.Wrapf(err, "cannot write to temporary file %v", tmpFile)
 	}
 
